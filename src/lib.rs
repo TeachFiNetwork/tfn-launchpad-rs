@@ -126,6 +126,13 @@ pub trait TFNLaunchpadContract<ContractReader>:
         }
     }
 
+    #[endpoint(whitelistUser)]
+    fn whitelist_user(&self, id: u64, user: ManagedAddress) {
+        self.only_launchpad_owner(id);
+
+        self.whitelisted_users(id).insert(user);
+    }
+
     #[payable("*")]
     #[endpoint]
     fn buy(&self, id: u64) {

@@ -127,6 +127,21 @@
             "outputs": []
         },
         {
+            "name": "whitelistUser",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                },
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "buy",
             "mutability": "mutable",
             "payableInTokens": [
@@ -356,21 +371,6 @@
                     "multi_result": true
                 }
             ]
-        },
-        {
-            "name": "whitelistUser",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "id",
-                    "type": "u64"
-                },
-                {
-                    "name": "user",
-                    "type": "Address"
-                }
-            ],
-            "outputs": []
         }
     ],
     "esdtAttributes": [],

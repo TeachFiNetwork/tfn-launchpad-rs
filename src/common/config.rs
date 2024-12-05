@@ -191,13 +191,6 @@ pub trait ConfigModule {
     #[storage_mapper("whitelisted_users")]
     fn whitelisted_users(&self, id: u64) -> UnorderedSetMapper<ManagedAddress>;
 
-    #[endpoint(whitelistUser)]
-    fn whitelist_user(&self, id: u64, user: ManagedAddress) {
-        self.only_launchpad_owner(id);
-
-        self.whitelisted_users(id).insert(user);
-    }
-
     // helpers
     fn only_dao(&self) {
         require!(self.blockchain().get_caller() == self.main_dao().get(), ERROR_ONLY_MAIN_DAO);
