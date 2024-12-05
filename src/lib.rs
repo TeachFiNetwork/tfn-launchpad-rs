@@ -27,13 +27,13 @@ pub trait TFNLaunchpadContract<ContractReader>:
         self.set_state_inactive();
     }
 
-    #[payable("*")]
     #[endpoint(newLaunchpad)]
     fn new_launchpad(
         &self,
         owner: ManagedAddress,
         kyc_enforced: bool,
         title: ManagedBuffer,
+        token: TokenIdentifier,
         payment_token: TokenIdentifier,
         price: BigUint, // if payment token is USDC (6 decimals), price should be x_000_000
         min_buy_amount: BigUint,
@@ -51,9 +51,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         require!(now < start_time, ERROR_WRONG_START_TIME);
         require!(start_time < end_time, ERROR_WRONG_END_TIME);
 
-        let payment = self.call_value().single_esdt();
-        require!(self.token_launchpad_id(&payment.token_identifier).is_empty(), ERROR_TOKEN_ALREADY_LAUNCHED);
-        require!(payment.amount > 0, ERROR_ZERO_PAYMENT);
+        require!(self.token_launchpad_id(&token).is_empty(), ERROR_TOKEN_ALREADY_LAUNCHED);
 
         let new_id = self.last_launchpad_id().get() + 1;
         let launchpad = Launchpad{
@@ -61,8 +59,8 @@ pub trait TFNLaunchpadContract<ContractReader>:
             owner,
             kyc_enforced,
             title,
-            token: payment.token_identifier.clone(),
-            amount: payment.amount,
+            token: token.clone(),
+            amount: BigUint::zero(),
             payment_token,
             price,
             min_buy_amount,
@@ -75,9 +73,25 @@ pub trait TFNLaunchpadContract<ContractReader>:
         };
         self.last_launchpad_id().set(new_id);
         self.launchpads(new_id).set(launchpad);
-        self.token_launchpad_id(&payment.token_identifier).set(new_id);
+        self.token_launchpad_id(&token).set(new_id);
 
         new_id
+    }
+
+    #[payable("*")]
+    #[endpoint(addTokens)]
+    fn add_tokens(&self, id: u64) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+        require!(!self.launchpads(id).is_empty(), ERROR_LAUNCHPAD_NOT_FOUND);
+
+        let mut launchpad = self.launchpads(id).get();
+        require!(launchpad.end_time < self.blockchain().get_block_timestamp(), ERROR_LAUNCHPAD_INACTIVE);
+
+        let payment = self.call_value().single_esdt();
+        require!(launchpad.token == payment.token_identifier, ERROR_WRONG_TOKEN);
+
+        launchpad.amount += payment.amount;
+        self.launchpads(id).set(launchpad);
     }
 
     #[endpoint(cancelLaunchpad)]
@@ -144,7 +158,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         let mut launchpad = self.launchpads(id).get();
         require!(launchpad.end_time < self.blockchain().get_block_timestamp(), ERROR_LAUNCHPAD_NOT_ENDED);
-        require!(!launchpad.deployed, ERROR_ALREADY_REDEEMED);
+        require!(!launchpad.deployed, ERROR_ALREADY_DEPLOYED);
 
         let (new_address, ()) = self
             .franchise_dao_contract_proxy()
