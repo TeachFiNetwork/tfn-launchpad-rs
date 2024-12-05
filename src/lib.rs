@@ -115,6 +115,15 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         self.launchpads(id).clear();
         self.token_launchpad_id(&launchpad.token).clear();
+
+        if launchpad.amount > 0 {
+            self.send().direct_esdt(
+                &launchpad.owner,
+                &launchpad.token,
+                0,
+                &launchpad.amount
+            );
+        }
     }
 
     #[payable("*")]
