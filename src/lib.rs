@@ -5,6 +5,7 @@ multiversx_sc::imports!();
 pub mod common;
 
 use common::{config::*, consts::*, errors::*};
+use tfn_dao::common::config::ProxyTrait as dao_proxy;
 
 #[multiversx_sc::contract]
 pub trait TFNLaunchpadContract<ContractReader>:
@@ -173,11 +174,22 @@ pub trait TFNLaunchpadContract<ContractReader>:
                 .execute_on_dest_context::<()>();
         }
     
-        self.send().change_owner_address(new_address, &launchpad.owner).execute_on_dest_context::<()>();
+        self.main_dao_contract_proxy()
+            .contract(self.main_dao().get())
+            .franchise_deployed(new_address.clone())
+            .execute_on_dest_context::<()>();
+
+        self.send()
+            .change_owner_address(new_address, &launchpad.owner)
+            .execute_on_dest_context::<()>();
 
         launchpad.deployed = true;
         self.launchpads(id).set(launchpad);
     }
+
+    // proxies
+    #[proxy]
+    fn main_dao_contract_proxy(&self) -> tfn_dao::Proxy<Self::Api>;
 
     #[proxy]
     fn franchise_dao_contract_proxy(&self) -> tfn_franchise_dao::Proxy<Self::Api>;
