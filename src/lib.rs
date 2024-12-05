@@ -27,6 +27,17 @@ pub trait TFNLaunchpadContract<ContractReader>:
         self.set_state_inactive();
     }
 
+    #[endpoint(changeFranchiseOwner)]
+    fn change_franchise_owner(&self, franchise: ManagedAddress, new_owner: ManagedAddress) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+        self.only_dao();
+
+        self.franchise_dao_contract_proxy()
+            .contract(franchise)
+            .change_owner(new_owner)
+            .execute_on_dest_context::<()>();
+    }
+
     #[endpoint(newLaunchpad)]
     fn new_launchpad(
         &self,
@@ -163,6 +174,8 @@ pub trait TFNLaunchpadContract<ContractReader>:
         let (new_address, ()) = self
             .franchise_dao_contract_proxy()
             .init(
+                &launchpad.owner,
+                &self.main_dao().get(),
                 &launchpad.token
             )
             .deploy_from_source(
@@ -191,10 +204,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
         self.main_dao_contract_proxy()
             .contract(self.main_dao().get())
             .franchise_deployed(new_address.clone())
-            .execute_on_dest_context::<()>();
-
-        self.send()
-            .change_owner_address(new_address, &launchpad.owner)
             .execute_on_dest_context::<()>();
 
         launchpad.deployed = true;
