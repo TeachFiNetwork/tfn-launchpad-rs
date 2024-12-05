@@ -96,7 +96,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         require!(!self.launchpads(id).is_empty(), ERROR_LAUNCHPAD_NOT_FOUND);
 
         let mut launchpad = self.launchpads(id).get();
-        require!(launchpad.end_time < self.blockchain().get_block_timestamp(), ERROR_LAUNCHPAD_INACTIVE);
+        require!(launchpad.end_time > self.blockchain().get_block_timestamp(), ERROR_LAUNCHPAD_INACTIVE);
 
         let payment = self.call_value().single_esdt();
         require!(launchpad.token == payment.token_identifier, ERROR_WRONG_TOKEN);
@@ -175,7 +175,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .franchise_dao_contract_proxy()
             .init(
                 &launchpad.owner,
-                &self.main_dao().get(),
+                self.main_dao().get(),
                 &launchpad.token
             )
             .deploy_from_source(
@@ -203,7 +203,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
     
         self.main_dao_contract_proxy()
             .contract(self.main_dao().get())
-            .franchise_deployed(new_address.clone())
+            .franchise_deployed(new_address)
             .execute_on_dest_context::<()>();
 
         launchpad.deployed = true;

@@ -36,11 +36,23 @@
     },
     "endpoints": [
         {
+            "name": "changeFranchiseOwner",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "franchise",
+                    "type": "Address"
+                },
+                {
+                    "name": "new_owner",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "newLaunchpad",
             "mutability": "mutable",
-            "payableInTokens": [
-                "*"
-            ],
             "inputs": [
                 {
                     "name": "owner",
@@ -53,6 +65,10 @@
                 {
                     "name": "title",
                     "type": "bytes"
+                },
+                {
+                    "name": "token",
+                    "type": "TokenIdentifier"
                 },
                 {
                     "name": "payment_token",
@@ -84,6 +100,20 @@
                     "type": "u64"
                 }
             ]
+        },
+        {
+            "name": "addTokens",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
         },
         {
             "name": "cancelLaunchpad",
