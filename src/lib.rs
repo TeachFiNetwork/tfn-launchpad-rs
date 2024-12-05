@@ -60,7 +60,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
             owner,
             kyc_enforced,
             title,
-            token: payment.token_identifier,
+            token: payment.token_identifier.clone(),
             amount: payment.amount,
             payment_token,
             price,
@@ -70,12 +70,25 @@ pub trait TFNLaunchpadContract<ContractReader>:
             end_time,
             total_raised: BigUint::zero(),
             total_sold: BigUint::zero(),
-            redeemed: false
+            deployed: false
         };
         self.last_launchpad_id().set(new_id);
         self.launchpads(new_id).set(launchpad);
+        self.token_launchpad_id(&payment.token_identifier).set(new_id);
 
         new_id
+    }
+
+    #[endpoint(cancelLaunchpad)]
+    fn cancel_launchpad(&self, id: u64) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+        self.only_launchpad_owner(id);
+
+        let launchpad = self.launchpads(id).get();
+        require!(launchpad.total_sold == 0, ERROR_DELETING_LAUNCHPAD);
+
+        self.launchpads(id).clear();
+        self.token_launchpad_id(&launchpad.token).clear();
     }
 
     #[payable("*")]
@@ -124,34 +137,48 @@ pub trait TFNLaunchpadContract<ContractReader>:
         self.launchpad_users(id).insert(caller);
     }
 
-    #[endpoint]
-    fn redeem(&self, id: u64) {
+    #[endpoint(deployFranchise)]
+    fn deploy_franchise(&self, id: u64) {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
 
         let mut launchpad = self.launchpads(id).get();
         require!(launchpad.end_time < self.blockchain().get_block_timestamp(), ERROR_LAUNCHPAD_NOT_ENDED);
-        require!(!launchpad.redeemed, ERROR_ALREADY_REDEEMED);
+        require!(!launchpad.deployed, ERROR_ALREADY_REDEEMED);
 
-        if launchpad.total_raised > 0 {
-            self.send().direct_esdt(
-                &launchpad.owner,
-                &launchpad.payment_token,
-                0,
-                &launchpad.total_raised
+        let (new_address, ()) = self
+            .franchise_dao_contract_proxy()
+            .init(
+                &launchpad.token
+            )
+            .deploy_from_source(
+                &self.template_dao().get(),
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC,
             );
+
+        let mut payments: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
+        if launchpad.total_raised > 0 {
+            payments.push(EsdtTokenPayment::new(launchpad.payment_token.clone(), 0, launchpad.total_raised.clone()));
         }
 
         let left_amount = &launchpad.amount - &launchpad.total_sold;
         if left_amount > 0 {
-            self.send().direct_esdt(
-                &launchpad.owner,
-                &launchpad.token,
-                0,
-                &left_amount
-            );
+            payments.push(EsdtTokenPayment::new(launchpad.token.clone(), 0, left_amount.clone()));
         }
 
-        launchpad.redeemed = true;
+        if !payments.is_empty() {
+            self.franchise_dao_contract_proxy()
+                .contract(new_address.clone())
+                .add_funds()
+                .multi_esdt(payments)
+                .execute_on_dest_context::<()>();
+        }
+    
+        self.send().change_owner_address(new_address, &launchpad.owner).execute_on_dest_context::<()>();
+
+        launchpad.deployed = true;
         self.launchpads(id).set(launchpad);
     }
+
+    #[proxy]
+    fn franchise_dao_contract_proxy(&self) -> tfn_franchise_dao::Proxy<Self::Api>;
 }

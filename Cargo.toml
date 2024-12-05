@@ -14,5 +14,8 @@ num-bigint = "0.4.2"
 [dependencies.multiversx-sc]
 version = "0.54.4"
 
+[dependencies.tfn-franchise-dao]
+path = "../tfn-franchise-dao-rs"
+
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.54.4"

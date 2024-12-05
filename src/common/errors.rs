@@ -16,3 +16,4 @@ pub static ERROR_INSUFFICIENT_FUNDS: &[u8] = b"insufficient funds left in contra
 pub static ERROR_NOT_WHITELISTED: &[u8] = b"user not whitelisted";
 pub static ERROR_LAUNCHPAD_NOT_ENDED: &[u8] = b"launchpad end time not reached";
 pub static ERROR_ALREADY_REDEEMED: &[u8] = b"raised funds already redeemed";
+pub static ERROR_DELETING_LAUNCHPAD: &[u8] = b"can not delete a launchpad when tokens were sold";

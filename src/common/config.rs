@@ -27,13 +27,13 @@ pub struct Launchpad<M: ManagedTypeApi> {
     pub end_time: u64,
     pub total_raised: BigUint<M>,
     pub total_sold: BigUint<M>,
-    pub redeemed: bool,
+    pub deployed: bool,
 }
 
 impl<M> Launchpad<M>
 where M: ManagedTypeApi {
     pub fn is_active(&self, current_timestamp: u64) -> bool {
-        return current_timestamp >= self.start_time && current_timestamp <= self.end_time && self.total_sold < self.amount
+        current_timestamp >= self.start_time && current_timestamp <= self.end_time && self.total_sold < self.amount
     }
 }
 
@@ -70,6 +70,101 @@ pub trait ConfigModule {
     #[view(getLaunchpads)]
     #[storage_mapper("launchpads")]
     fn launchpads(&self, id: u64) -> SingleValueMapper<Launchpad<Self::Api>>;
+
+    #[view(getAllLaunchpads)]
+    fn get_all_launchpads(&self) -> ManagedVec<Launchpad<Self::Api>> {
+        let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
+        for i in 1..self.last_launchpad_id().get()+1 {
+            if self.launchpads(i).is_empty() {
+                continue
+            }
+
+            launchpads.push(self.launchpads(i).get());
+        }
+
+        launchpads
+    }
+
+    #[view(getAllLaunchpadsSince)]
+    fn get_all_launchpads_since(&self, timestamp: u64) -> ManagedVec<Launchpad<Self::Api>> {
+        let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
+        for i in 1..self.last_launchpad_id().get()+1 {
+            if self.launchpads(i).is_empty() {
+                continue
+            }
+
+            let launchpad = self.launchpads(i).get();
+            if launchpad.end_time > timestamp {
+                launchpads.push(launchpad);
+            }
+        }
+
+        launchpads
+    }
+
+    #[view(getActiveLaunchpads)]
+    fn get_active_launchpads(&self) -> ManagedVec<Launchpad<Self::Api>> {
+        let now = self.blockchain().get_block_timestamp();
+        let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
+        for i in 1..self.last_launchpad_id().get()+1 {
+            if self.launchpads(i).is_empty() {
+                continue
+            }
+
+            let launchpad = self.launchpads(i).get();
+            if launchpad.is_active(now) {
+                launchpads.push(launchpad);
+            }
+        }
+
+        launchpads
+    }
+
+    #[view(getEndedLaunchpadsNotDeployed)]
+    fn get_ended_launchpads_not_deployed(&self) -> ManagedVec<Launchpad<Self::Api>> {
+        let now = self.blockchain().get_block_timestamp();
+        let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
+        for i in 1..self.last_launchpad_id().get()+1 {
+            if self.launchpads(i).is_empty() {
+                continue
+            }
+
+            let launchpad = self.launchpads(i).get();
+            if !launchpad.deployed && !launchpad.is_active(now) {
+                launchpads.push(launchpad);
+            }
+        }
+
+        launchpads
+    }
+
+    #[view(getTotalRaised)]
+    fn get_total_raised(&self) -> ManagedVec<EsdtTokenPayment<Self::Api>> {
+        let mut raised: ManagedVec<EsdtTokenPayment<Self::Api>> = ManagedVec::new();
+        for i in 1..self.last_launchpad_id().get()+1 {
+            if self.launchpads(i).is_empty() {
+                continue
+            }
+
+            let launchpad = self.launchpads(i).get();
+            let mut found = false;
+            for i in 0..raised.len() {
+                let mut payment = raised.get(i);
+                if payment.token_identifier == launchpad.payment_token {
+                    payment.amount += &launchpad.total_raised;
+                    let _ = raised.set(i, payment);
+                    found = true;
+                    break;
+                }
+            }
+            if !found {
+                let payment = EsdtTokenPayment::new(launchpad.payment_token, 0, launchpad.total_raised);
+                raised.push(payment);
+            }
+        }
+
+        raised
+    }
 
     #[view(getLastLaunchpadId)]
     #[storage_mapper("last_launchpad_id")]
