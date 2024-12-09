@@ -17,6 +17,16 @@ pub trait TFNLaunchpadContract<ContractReader>:
         main_dao_address: ManagedAddress,
         template_dao_address: ManagedAddress
     ) {
+        let shard = self.blockchain().get_shard_of_address(&self.blockchain().get_sc_address());
+        require!(
+            self.blockchain().get_shard_of_address(&main_dao_address) == shard,
+            ERROR_WRONG_MAIN_DAO_SHARD
+        );
+        require!(
+            self.blockchain().get_shard_of_address(&template_dao_address) == shard,
+            ERROR_WRONG_TEMPLATE_DAO_SHARD
+        );
+
         self.main_dao().set(main_dao_address);
         self.template_dao().set(template_dao_address);
         self.set_state_inactive();

@@ -1,3 +1,5 @@
+pub static ERROR_WRONG_MAIN_DAO_SHARD: &[u8] = b"main DAO is on another shard";
+pub static ERROR_WRONG_TEMPLATE_DAO_SHARD: &[u8] = b"template DAO is on another shard";
 pub static ERROR_ONLY_MAIN_DAO: &[u8] = b"only the main DAO can execute this action";
 pub static ERROR_ONLY_LAUNCHPAD_OWNER: &[u8] = b"only the launchpad owner can execute this action";
 pub static ERROR_NOT_ACTIVE: &[u8] = b"contract is paused";
