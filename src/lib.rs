@@ -53,7 +53,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         &self,
         owner: ManagedAddress,
         kyc_enforced: bool,
-        title: ManagedBuffer,
+        description: ManagedBuffer,
         token: TokenIdentifier,
         payment_token: TokenIdentifier,
         price: BigUint, // if payment token is USDC (6 decimals), price should be x_000_000
@@ -79,7 +79,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
             id: new_id,
             owner,
             kyc_enforced,
-            title,
+            description,
             token: token.clone(),
             amount: BigUint::zero(),
             payment_token,

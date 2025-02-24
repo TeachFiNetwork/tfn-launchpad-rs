@@ -16,7 +16,7 @@ pub struct Launchpad<M: ManagedTypeApi> {
     pub id: u64,
     pub owner: ManagedAddress<M>,
     pub kyc_enforced: bool,
-    pub title: ManagedBuffer<M>,
+    pub description: ManagedBuffer<M>,
     pub token: TokenIdentifier<M>, // should have 18 decimals. please check in front end
     pub amount: BigUint<M>,
     pub payment_token: TokenIdentifier<M>,

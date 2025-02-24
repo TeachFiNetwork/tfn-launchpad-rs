@@ -4,3 +4,4 @@ meta/target/
 target/
 output/
 wasm/
+*.sh

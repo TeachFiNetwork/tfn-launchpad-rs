@@ -63,7 +63,7 @@
                     "type": "bool"
                 },
                 {
-                    "name": "title",
+                    "name": "description",
                     "type": "bytes"
                 },
                 {
@@ -409,7 +409,7 @@
                     "type": "bool"
                 },
                 {
-                    "name": "title",
+                    "name": "description",
                     "type": "bytes"
                 },
                 {
