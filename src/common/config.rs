@@ -11,6 +11,15 @@ pub enum State {
 }
 
 #[type_abi]
+#[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
+pub enum Status {
+    Pending,
+    Active,
+    Ended,
+    Deployed,
+}
+
+#[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Debug)]
 pub struct Launchpad<M: ManagedTypeApi> {
     pub id: u64,
@@ -28,12 +37,28 @@ pub struct Launchpad<M: ManagedTypeApi> {
     pub total_raised: BigUint<M>,
     pub total_sold: BigUint<M>,
     pub deployed: bool,
+    pub status: Status
 }
 
 impl<M> Launchpad<M>
 where M: ManagedTypeApi {
     pub fn is_active(&self, current_timestamp: u64) -> bool {
         current_timestamp >= self.start_time && current_timestamp <= self.end_time && self.total_sold < self.amount
+    }
+
+    pub fn get_status(&self, current_timestamp: u64) -> Status {
+        if self.start_time <= current_timestamp && self.end_time >= current_timestamp {
+            Status::Active
+        } else
+        if self.end_time < current_timestamp {
+            if self.deployed {
+                Status::Deployed
+            } else {
+                Status::Ended
+            }
+        } else {
+            Status::Pending
+        }
     }
 }
 
@@ -67,19 +92,22 @@ pub trait ConfigModule {
     fn template_dao(&self) -> SingleValueMapper<ManagedAddress>;
 
     // launchpads
-    #[view(getLaunchpads)]
+    #[view(getLaunchpad)]
     #[storage_mapper("launchpads")]
     fn launchpads(&self, id: u64) -> SingleValueMapper<Launchpad<Self::Api>>;
 
     #[view(getAllLaunchpads)]
     fn get_all_launchpads(&self) -> ManagedVec<Launchpad<Self::Api>> {
+        let current_time = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
         for i in 1..self.last_launchpad_id().get()+1 {
             if self.launchpads(i).is_empty() {
                 continue
             }
 
-            launchpads.push(self.launchpads(i).get());
+            let mut launchpad = self.launchpads(i).get();
+            launchpad.status = launchpad.get_status(current_time);
+            launchpads.push(launchpad);
         }
 
         launchpads
@@ -87,14 +115,16 @@ pub trait ConfigModule {
 
     #[view(getAllLaunchpadsSince)]
     fn get_all_launchpads_since(&self, timestamp: u64) -> ManagedVec<Launchpad<Self::Api>> {
+        let current_time = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
         for i in 1..self.last_launchpad_id().get()+1 {
             if self.launchpads(i).is_empty() {
                 continue
             }
 
-            let launchpad = self.launchpads(i).get();
+            let mut launchpad = self.launchpads(i).get();
             if launchpad.end_time > timestamp {
+                launchpad.status = launchpad.get_status(current_time);
                 launchpads.push(launchpad);
             }
         }
