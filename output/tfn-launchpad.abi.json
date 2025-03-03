@@ -211,7 +211,7 @@
             ]
         },
         {
-            "name": "getLaunchpads",
+            "name": "getLaunchpad",
             "mutability": "readonly",
             "inputs": [
                 {
@@ -455,6 +455,10 @@
                 {
                     "name": "deployed",
                     "type": "bool"
+                },
+                {
+                    "name": "status",
+                    "type": "Status"
                 }
             ]
         },
@@ -468,6 +472,27 @@
                 {
                     "name": "Active",
                     "discriminant": 1
+                }
+            ]
+        },
+        "Status": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Pending",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Active",
+                    "discriminant": 1
+                },
+                {
+                    "name": "Ended",
+                    "discriminant": 2
+                },
+                {
+                    "name": "Deployed",
+                    "discriminant": 3
                 }
             ]
         }
