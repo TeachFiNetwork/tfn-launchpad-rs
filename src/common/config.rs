@@ -49,8 +49,7 @@ where M: ManagedTypeApi {
     pub fn get_status(&self, current_timestamp: u64) -> Status {
         if self.start_time <= current_timestamp && self.end_time >= current_timestamp {
             Status::Active
-        } else
-        if self.end_time < current_timestamp {
+        } else if self.end_time < current_timestamp {
             if self.deployed {
                 Status::Deployed
             } else {

@@ -1,11 +1,11 @@
 {
     "buildInfo": {
         "rustc": {
-            "version": "1.81.0-nightly",
-            "commitHash": "fda509e817abeeecb5b76bc1de844f355675c81e",
-            "commitDate": "2024-06-25",
-            "channel": "Nightly",
-            "short": "rustc 1.81.0-nightly (fda509e81 2024-06-25)"
+            "version": "1.85.0",
+            "commitHash": "4d91de4e48198da2e33413efdcd9cd2cc0c46688",
+            "commitDate": "2025-02-17",
+            "channel": "Stable",
+            "short": "rustc 1.85.0 (4d91de4e4 2025-02-17)"
         },
         "contractCrate": {
             "name": "tfn-launchpad",
@@ -164,7 +164,11 @@
                     "type": "u64"
                 }
             ],
-            "outputs": []
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
         },
         {
             "name": "setStateActive",

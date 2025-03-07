@@ -5,6 +5,7 @@ multiversx_sc::imports!();
 pub mod common;
 
 use common::{config::*, consts::*, errors::*};
+use tfn_franchise_dao::ProxyTrait as franchise_dao_proxy;
 use tfn_dao::common::config::ProxyTrait as dao_proxy;
 
 #[multiversx_sc::contract]
@@ -34,7 +35,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
     #[upgrade]
     fn upgrade(&self) {
-        self.set_state_inactive();
+//        self.set_state_inactive();
     }
 
     #[endpoint(changeFranchiseOwner)]
@@ -191,8 +192,9 @@ pub trait TFNLaunchpadContract<ContractReader>:
     }
 
     #[endpoint(deployFranchise)]
-    fn deploy_franchise(&self, id: u64) {
+    fn deploy_franchise(&self, id: u64) -> ManagedAddress {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+        require!(!self.launchpads(id).is_empty(), ERROR_LAUNCHPAD_NOT_FOUND);
 
         let mut launchpad = self.launchpads(id).get();
         require!(launchpad.end_time < self.blockchain().get_block_timestamp(), ERROR_LAUNCHPAD_NOT_ENDED);
@@ -230,11 +232,13 @@ pub trait TFNLaunchpadContract<ContractReader>:
     
         self.main_dao_contract_proxy()
             .contract(self.main_dao().get())
-            .franchise_deployed(new_address)
+            .franchise_deployed(new_address.clone())
             .execute_on_dest_context::<()>();
 
         launchpad.deployed = true;
         self.launchpads(id).set(launchpad);
+
+        new_address
     }
 
     // proxies
