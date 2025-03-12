@@ -93,8 +93,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
             total_sold: BigUint::zero(),
             deployed: false,
             status: Status::Pending,
-            bought: BigUint::zero(),
-            whitelisted: false,
         };
         self.last_launchpad_id().set(new_id);
         self.launchpads(new_id).set(launchpad);

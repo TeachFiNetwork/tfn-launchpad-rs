@@ -38,8 +38,14 @@ pub struct Launchpad<M: ManagedTypeApi> {
     pub total_sold: BigUint<M>,
     pub deployed: bool,
     pub status: Status,
+}
+
+#[type_abi]
+#[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Debug)]
+pub struct LaunchpadView<M: ManagedTypeApi> {
     pub bought: BigUint<M>,
     pub whitelisted: bool,
+    pub launchpad: Launchpad<M>,
 }
 
 impl<M> Launchpad<M>
@@ -98,13 +104,13 @@ pub trait ConfigModule {
     fn launchpads(&self, id: u64) -> SingleValueMapper<Launchpad<Self::Api>>;
 
     #[view(getAllLaunchpads)]
-    fn get_all_launchpads(&self, user: OptionalValue<ManagedAddress>) -> ManagedVec<Launchpad<Self::Api>> {
+    fn get_all_launchpads(&self, user: OptionalValue<ManagedAddress>) -> ManagedVec<LaunchpadView<Self::Api>> {
         let address = match user {
             OptionalValue::Some(addr) => addr,
             OptionalValue::None => ManagedAddress::zero(),
         };
         let current_time = self.blockchain().get_block_timestamp();
-        let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
+        let mut launchpads: ManagedVec<LaunchpadView<Self::Api>> = ManagedVec::new();
         for i in 1..self.last_launchpad_id().get()+1 {
             if self.launchpads(i).is_empty() {
                 continue
@@ -112,9 +118,11 @@ pub trait ConfigModule {
 
             let mut launchpad = self.launchpads(i).get();
             launchpad.status = launchpad.get_status(current_time);
-            launchpad.bought = self.user_participation(&address, i).get();
-            launchpad.whitelisted = self.whitelisted_users(i).contains(&address);
-            launchpads.push(launchpad);
+            launchpads.push(LaunchpadView {
+                bought: self.user_participation(&address, i).get(),
+                whitelisted: self.whitelisted_users(i).contains(&address),
+                launchpad,
+            });
         }
 
         launchpads

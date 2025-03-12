@@ -241,7 +241,7 @@
             ],
             "outputs": [
                 {
-                    "type": "List<Launchpad>"
+                    "type": "List<LaunchpadView>"
                 }
             ]
         },
@@ -469,7 +469,12 @@
                 {
                     "name": "status",
                     "type": "Status"
-                },
+                }
+            ]
+        },
+        "LaunchpadView": {
+            "type": "struct",
+            "fields": [
                 {
                     "name": "bought",
                     "type": "BigUint"
@@ -477,6 +482,10 @@
                 {
                     "name": "whitelisted",
                     "type": "bool"
+                },
+                {
+                    "name": "launchpad",
+                    "type": "Launchpad"
                 }
             ]
         },
