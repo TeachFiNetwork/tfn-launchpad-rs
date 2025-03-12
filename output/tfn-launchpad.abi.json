@@ -232,7 +232,13 @@
         {
             "name": "getAllLaunchpads",
             "mutability": "readonly",
-            "inputs": [],
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "optional<Address>",
+                    "multi_arg": true
+                }
+            ],
             "outputs": [
                 {
                     "type": "List<Launchpad>"
@@ -463,6 +469,14 @@
                 {
                     "name": "status",
                     "type": "Status"
+                },
+                {
+                    "name": "bought",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "whitelisted",
+                    "type": "bool"
                 }
             ]
         },

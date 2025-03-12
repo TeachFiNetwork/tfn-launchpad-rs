@@ -37,7 +37,9 @@ pub struct Launchpad<M: ManagedTypeApi> {
     pub total_raised: BigUint<M>,
     pub total_sold: BigUint<M>,
     pub deployed: bool,
-    pub status: Status
+    pub status: Status,
+    pub bought: BigUint<M>,
+    pub whitelisted: bool,
 }
 
 impl<M> Launchpad<M>
@@ -96,7 +98,11 @@ pub trait ConfigModule {
     fn launchpads(&self, id: u64) -> SingleValueMapper<Launchpad<Self::Api>>;
 
     #[view(getAllLaunchpads)]
-    fn get_all_launchpads(&self) -> ManagedVec<Launchpad<Self::Api>> {
+    fn get_all_launchpads(&self, user: OptionalValue<ManagedAddress>) -> ManagedVec<Launchpad<Self::Api>> {
+        let address = match user {
+            OptionalValue::Some(addr) => addr,
+            OptionalValue::None => ManagedAddress::zero(),
+        };
         let current_time = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
         for i in 1..self.last_launchpad_id().get()+1 {
@@ -106,6 +112,8 @@ pub trait ConfigModule {
 
             let mut launchpad = self.launchpads(i).get();
             launchpad.status = launchpad.get_status(current_time);
+            launchpad.bought = self.user_participation(&address, i).get();
+            launchpad.whitelisted = self.whitelisted_users(i).contains(&address);
             launchpads.push(launchpad);
         }
 

@@ -93,6 +93,8 @@ pub trait TFNLaunchpadContract<ContractReader>:
             total_sold: BigUint::zero(),
             deployed: false,
             status: Status::Pending,
+            bought: BigUint::zero(),
+            whitelisted: false,
         };
         self.last_launchpad_id().set(new_id);
         self.launchpads(new_id).set(launchpad);
@@ -240,6 +242,24 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         new_address
     }
+
+    // #[endpoint(upgradeFranchise)]
+    // fn upgrade_franchise(&self, franchise_address: ManagedAddress, id: u64) {
+    //     let launchpad = self.launchpads(id).get();
+    //     let mut args = ManagedArgBuffer::new();
+    //     args.push_arg(&launchpad.owner);
+    //     args.push_arg(&self.main_dao().get());
+    //     args.push_arg(&launchpad.token);
+    //     let gas_left = self.blockchain().get_gas_left();
+    //     self.tx()
+    //         .to(franchise_address)
+    //         .gas(gas_left)
+    //         .raw_upgrade()
+    //         .arguments_raw(args)
+    //         .from_source(self.template_dao().get())
+    //         .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
+    //         .upgrade_async_call_and_exit();
+    // }
 
     // proxies
     #[proxy]
