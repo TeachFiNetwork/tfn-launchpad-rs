@@ -120,7 +120,7 @@ pub trait ConfigModule {
             launchpad.status = launchpad.get_status(current_time);
             launchpads.push(LaunchpadView {
                 bought: self.user_participation(&address, i).get(),
-                whitelisted: self.whitelisted_users(i).contains(&address),
+                whitelisted: self.whitelisted_users(i).contains(&address) || !launchpad.kyc_enforced,
                 launchpad,
             });
         }
