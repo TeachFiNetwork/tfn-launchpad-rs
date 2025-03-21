@@ -229,7 +229,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
                 .multi_esdt(payments)
                 .execute_on_dest_context::<()>();
         }
-    
+
         self.main_dao_contract_proxy()
             .contract(self.main_dao().get())
             .franchise_deployed(new_address.clone())
@@ -241,23 +241,25 @@ pub trait TFNLaunchpadContract<ContractReader>:
         new_address
     }
 
-    // #[endpoint(upgradeFranchise)]
-    // fn upgrade_franchise(&self, franchise_address: ManagedAddress, id: u64) {
-    //     let launchpad = self.launchpads(id).get();
-    //     let mut args = ManagedArgBuffer::new();
-    //     args.push_arg(&launchpad.owner);
-    //     args.push_arg(&self.main_dao().get());
-    //     args.push_arg(&launchpad.token);
-    //     let gas_left = self.blockchain().get_gas_left();
-    //     self.tx()
-    //         .to(franchise_address)
-    //         .gas(gas_left)
-    //         .raw_upgrade()
-    //         .arguments_raw(args)
-    //         .from_source(self.template_dao().get())
-    //         .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
-    //         .upgrade_async_call_and_exit();
-    // }
+    #[endpoint(upgradeFranchise)]
+    fn upgrade_franchise(&self, franchise_address: ManagedAddress, args: OptionalValue<ManagedArgBuffer<Self::Api>>) {
+        let caller = self.blockchain().get_caller();
+        require!(caller == self.blockchain().get_owner_address() || caller == self.main_dao().get(), ERROR_ONLY_OWNER_OR_DAO);
+
+        let upgrade_args = match args {
+            OptionalValue::Some(args) => args,
+            OptionalValue::None => ManagedArgBuffer::new(),            
+        };
+        let gas_left = self.blockchain().get_gas_left();
+        self.tx()
+            .to(franchise_address)
+            .gas(gas_left)
+            .raw_upgrade()
+            .arguments_raw(upgrade_args)
+            .from_source(self.template_dao().get())
+            .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
+            .upgrade_async_call_and_exit();
+    }
 
     // proxies
     #[proxy]

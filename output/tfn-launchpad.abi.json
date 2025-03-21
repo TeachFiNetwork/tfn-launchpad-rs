@@ -171,6 +171,22 @@
             ]
         },
         {
+            "name": "upgradeFranchise",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "franchise_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "args",
+                    "type": "optional<List<bytes>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "setStateActive",
             "onlyOwner": true,
             "mutability": "mutable",
