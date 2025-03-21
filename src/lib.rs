@@ -75,9 +75,8 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         require!(self.token_launchpad_id(&token).is_empty(), ERROR_TOKEN_ALREADY_LAUNCHED);
 
-        let new_id = self.last_launchpad_id().get() + 1;
         let launchpad = Launchpad{
-            id: new_id,
+            id: self.last_launchpad_id().get(),
             owner,
             kyc_enforced,
             description,
@@ -94,11 +93,11 @@ pub trait TFNLaunchpadContract<ContractReader>:
             deployed: false,
             status: Status::Pending,
         };
-        self.last_launchpad_id().set(new_id);
-        self.launchpads(new_id).set(launchpad);
-        self.token_launchpad_id(&token).set(new_id);
+        self.launchpads(launchpad.id).set(&launchpad);
+        self.token_launchpad_id(&token).set(launchpad.id);
+        self.last_launchpad_id().set(launchpad.id + 1);
 
-        new_id
+        launchpad.id
     }
 
     #[payable("*")]

@@ -111,7 +111,7 @@ pub trait ConfigModule {
         };
         let current_time = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<LaunchpadView<Self::Api>> = ManagedVec::new();
-        for i in 1..self.last_launchpad_id().get()+1 {
+        for i in 0..self.last_launchpad_id().get() {
             if self.launchpads(i).is_empty() {
                 continue
             }
@@ -132,7 +132,7 @@ pub trait ConfigModule {
     fn get_all_launchpads_since(&self, timestamp: u64) -> ManagedVec<Launchpad<Self::Api>> {
         let current_time = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
-        for i in 1..self.last_launchpad_id().get()+1 {
+        for i in 0..self.last_launchpad_id().get() {
             if self.launchpads(i).is_empty() {
                 continue
             }
@@ -151,7 +151,7 @@ pub trait ConfigModule {
     fn get_active_launchpads(&self) -> ManagedVec<Launchpad<Self::Api>> {
         let now = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
-        for i in 1..self.last_launchpad_id().get()+1 {
+        for i in 0..self.last_launchpad_id().get() {
             if self.launchpads(i).is_empty() {
                 continue
             }
@@ -169,7 +169,7 @@ pub trait ConfigModule {
     fn get_ended_launchpads_not_deployed(&self) -> ManagedVec<Launchpad<Self::Api>> {
         let now = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<Launchpad<Self::Api>> = ManagedVec::new();
-        for i in 1..self.last_launchpad_id().get()+1 {
+        for i in 0..self.last_launchpad_id().get() {
             if self.launchpads(i).is_empty() {
                 continue
             }
@@ -186,7 +186,7 @@ pub trait ConfigModule {
     #[view(getTotalRaised)]
     fn get_total_raised(&self) -> ManagedVec<EsdtTokenPayment<Self::Api>> {
         let mut raised: ManagedVec<EsdtTokenPayment<Self::Api>> = ManagedVec::new();
-        for i in 1..self.last_launchpad_id().get()+1 {
+        for i in 0..self.last_launchpad_id().get() {
             if self.launchpads(i).is_empty() {
                 continue
             }
