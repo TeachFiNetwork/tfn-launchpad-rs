@@ -16,7 +16,9 @@ pub trait TFNLaunchpadContract<ContractReader>:
     fn init(
         &self,
         main_dao_address: ManagedAddress,
-        template_dao_address: ManagedAddress
+        template_dao_address: ManagedAddress,
+        template_employee_address: ManagedAddress,
+        template_student_address: ManagedAddress,
     ) {
         let shard = self.blockchain().get_shard_of_address(&self.blockchain().get_sc_address());
         require!(
@@ -30,6 +32,8 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         self.main_dao().set(main_dao_address);
         self.template_dao().set(template_dao_address);
+        self.template_employee().set(template_employee_address);
+        self.template_student().set(template_student_address);
         self.set_state_inactive();
     }
 
@@ -203,8 +207,10 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .franchise_dao_contract_proxy()
             .init(
                 &launchpad.owner,
+                &launchpad.token,
                 self.main_dao().get(),
-                &launchpad.token
+                self.template_employee().get(),
+                self.template_student().get(),
             )
             .deploy_from_source(
                 &self.template_dao().get(),

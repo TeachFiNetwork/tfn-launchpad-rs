@@ -26,6 +26,14 @@
             {
                 "name": "template_dao_address",
                 "type": "Address"
+            },
+            {
+                "name": "template_employee_address",
+                "type": "Address"
+            },
+            {
+                "name": "template_student_address",
+                "type": "Address"
             }
         ],
         "outputs": []
@@ -222,6 +230,26 @@
         },
         {
             "name": "getTemplateDAO",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getTemplateEmployee",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getTemplateStudent",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [

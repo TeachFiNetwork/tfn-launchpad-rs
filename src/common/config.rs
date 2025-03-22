@@ -98,6 +98,16 @@ pub trait ConfigModule {
     #[storage_mapper("template_dao")]
     fn template_dao(&self) -> SingleValueMapper<ManagedAddress>;
 
+    // template employee sc address
+    #[view(getTemplateEmployee)]
+    #[storage_mapper("template_employee")]
+    fn template_employee(&self) -> SingleValueMapper<ManagedAddress>;
+
+    // template student sc address
+    #[view(getTemplateStudent)]
+    #[storage_mapper("template_student")]
+    fn template_student(&self) -> SingleValueMapper<ManagedAddress>;
+
     // launchpads
     #[view(getLaunchpad)]
     #[storage_mapper("launchpads")]
