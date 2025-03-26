@@ -24,6 +24,10 @@
                 "type": "Address"
             },
             {
+                "name": "dex_address",
+                "type": "Address"
+            },
+            {
                 "name": "template_dao_address",
                 "type": "Address"
             },
@@ -220,6 +224,26 @@
         },
         {
             "name": "getMainDAO",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getGovernanceToken",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "getDEX",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [

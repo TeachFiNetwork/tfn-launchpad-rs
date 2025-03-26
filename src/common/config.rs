@@ -93,6 +93,15 @@ pub trait ConfigModule {
     #[storage_mapper("main_dao")]
     fn main_dao(&self) -> SingleValueMapper<ManagedAddress>;
 
+    #[view(getGovernanceToken)]
+    #[storage_mapper("governance_token")]
+    fn governance_token(&self) -> SingleValueMapper<TokenIdentifier>;
+
+    // dex sc address
+    #[view(getDEX)]
+    #[storage_mapper("dex")]
+    fn dex(&self) -> SingleValueMapper<ManagedAddress>;
+
     // template dao sc address
     #[view(getTemplateDAO)]
     #[storage_mapper("template_dao")]

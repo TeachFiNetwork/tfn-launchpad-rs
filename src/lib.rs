@@ -7,6 +7,7 @@ pub mod common;
 use common::{config::*, consts::*, errors::*};
 use tfn_franchise_dao::ProxyTrait as franchise_dao_proxy;
 use tfn_dao::common::config::ProxyTrait as dao_proxy;
+use tfn_dex::ProxyTrait as dex_proxy;
 
 #[multiversx_sc::contract]
 pub trait TFNLaunchpadContract<ContractReader>:
@@ -16,6 +17,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
     fn init(
         &self,
         main_dao_address: ManagedAddress,
+        dex_address: ManagedAddress,
         template_dao_address: ManagedAddress,
         template_employee_address: ManagedAddress,
         template_student_address: ManagedAddress,
@@ -31,10 +33,15 @@ pub trait TFNLaunchpadContract<ContractReader>:
         );
 
         self.main_dao().set(main_dao_address);
+        let governance_token: TokenIdentifier = self.main_dao_contract_proxy()
+            .contract(self.main_dao().get())
+            .governance_token()
+            .execute_on_dest_context();
+        self.governance_token().set(governance_token);
+        self.dex().set(dex_address);
         self.template_dao().set(template_dao_address);
         self.template_employee().set(template_employee_address);
         self.template_student().set(template_student_address);
-        self.set_state_inactive();
     }
 
     #[upgrade]
@@ -239,6 +246,11 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .franchise_deployed(new_address.clone())
             .execute_on_dest_context::<()>();
 
+        self.dex_contract_proxy()
+            .contract(self.dex().get())
+            .create_pair(self.governance_token().get(), &launchpad.token, 18)
+            .execute_on_dest_context::<()>();
+
         launchpad.deployed = true;
         self.deployed_launchpads(new_address.clone()).set(id);
         self.launchpads(id).set(launchpad);
@@ -269,6 +281,9 @@ pub trait TFNLaunchpadContract<ContractReader>:
     // proxies
     #[proxy]
     fn main_dao_contract_proxy(&self) -> tfn_dao::Proxy<Self::Api>;
+
+    #[proxy]
+    fn dex_contract_proxy(&self) -> tfn_dex::Proxy<Self::Api>;
 
     #[proxy]
     fn franchise_dao_contract_proxy(&self) -> tfn_franchise_dao::Proxy<Self::Api>;

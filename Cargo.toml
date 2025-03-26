@@ -17,6 +17,9 @@ version = "0.54.4"
 [dependencies.tfn-dao]
 path = "../tfn-dao-rs"
 
+[dependencies.tfn-dex]
+path = "../tfn-dex-rs"
+
 [dependencies.tfn-franchise-dao]
 path = "../tfn-franchise-dao-rs"
 
