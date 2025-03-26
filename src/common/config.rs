@@ -241,9 +241,14 @@ pub trait ConfigModule {
     #[storage_mapper("user_participation")]
     fn user_participation(&self, user: &ManagedAddress, id: u64) -> SingleValueMapper<BigUint>;
 
-    #[view(getDeployedLaunchpads)]
+    #[view(getDeployedLaunchpadId)]
     #[storage_mapper("deployed_launchpads")]
     fn deployed_launchpads(&self, address: ManagedAddress) -> SingleValueMapper<u64>;
+
+    #[view(getDeployedLaunchpadByAddress)]
+    fn get_ended_launchpad(&self, address: ManagedAddress) -> Launchpad<Self::Api> {
+        self.launchpads(self.deployed_launchpads(address).get()).get()
+    }
 
     // kyc
     #[view(getWhitelistedUsers)]

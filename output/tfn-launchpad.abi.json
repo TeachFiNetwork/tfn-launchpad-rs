@@ -411,7 +411,7 @@
             ]
         },
         {
-            "name": "getDeployedLaunchpads",
+            "name": "getDeployedLaunchpadId",
             "mutability": "readonly",
             "inputs": [
                 {
@@ -422,6 +422,21 @@
             "outputs": [
                 {
                     "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getDeployedLaunchpadByAddress",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Launchpad"
                 }
             ]
         },
