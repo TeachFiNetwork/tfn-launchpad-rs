@@ -39,7 +39,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
     #[upgrade]
     fn upgrade(&self) {
-//        self.set_state_inactive();
     }
 
     #[endpoint(changeFranchiseOwner)]
@@ -241,6 +240,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .execute_on_dest_context::<()>();
 
         launchpad.deployed = true;
+        self.deployed_launchpads(new_address.clone()).set(id);
         self.launchpads(id).set(launchpad);
 
         new_address

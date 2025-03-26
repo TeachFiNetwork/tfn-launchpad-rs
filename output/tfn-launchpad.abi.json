@@ -411,6 +411,21 @@
             ]
         },
         {
+            "name": "getDeployedLaunchpads",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
             "name": "getWhitelistedUsers",
             "mutability": "readonly",
             "inputs": [
