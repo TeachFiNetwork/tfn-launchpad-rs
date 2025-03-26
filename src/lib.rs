@@ -214,9 +214,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .init(
                 &launchpad.owner,
                 &launchpad.token,
-                self.main_dao().get(),
-                self.template_employee().get(),
-                self.template_student().get(),
             )
             .deploy_from_source(
                 &self.template_dao().get(),
