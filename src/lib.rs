@@ -200,6 +200,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         self.launchpad_users(id).insert(caller);
     }
 
+    #[payable("EGLD")]
     #[endpoint(deployFranchise)]
     fn deploy_franchise(&self, id: u64) -> ManagedAddress {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
@@ -246,6 +247,8 @@ pub trait TFNLaunchpadContract<ContractReader>:
         self.dex_contract_proxy()
             .contract(self.dex().get())
             .create_pair(self.governance_token().get(), &launchpad.token, 18)
+            .with_egld_transfer(self.call_value().egld_value().clone_value())
+            .gas(GAS_LIMIT_FOR_CREATE_PAIR)
             .execute_on_dest_context::<()>();
 
         launchpad.deployed = true;

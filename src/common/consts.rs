@@ -1,1 +1,2 @@
 pub const ONE: u64 = 1_000_000_000_000_000_000;
+pub const GAS_LIMIT_FOR_CREATE_PAIR: u64 = 100_000_000;

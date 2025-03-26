@@ -170,6 +170,9 @@
         {
             "name": "deployFranchise",
             "mutability": "mutable",
+            "payableInTokens": [
+                "EGLD"
+            ],
             "inputs": [
                 {
                     "name": "id",
