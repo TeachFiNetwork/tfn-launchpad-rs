@@ -8,6 +8,7 @@ use common::{config::*, consts::*, errors::*};
 use tfn_franchise_dao::ProxyTrait as franchise_dao_proxy;
 use tfn_dao::common::config::ProxyTrait as dao_proxy;
 use tfn_dex::ProxyTrait as dex_proxy;
+use tfn_platform::ProxyTrait as platform_proxy;
 
 #[multiversx_sc::contract]
 pub trait TFNLaunchpadContract<ContractReader>:
@@ -18,6 +19,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         &self,
         main_dao_address: ManagedAddress,
         dex_address: ManagedAddress,
+        platform: ManagedAddress,
         template_dao_address: ManagedAddress,
         template_employee_address: ManagedAddress,
         template_student_address: ManagedAddress,
@@ -39,6 +41,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .execute_on_dest_context();
         self.governance_token().set(governance_token);
         self.dex().set(dex_address);
+        self.platform().set(platform);
         self.template_dao().set(template_dao_address);
         self.template_employee().set(template_employee_address);
         self.template_student().set(template_student_address);
@@ -244,6 +247,11 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .franchise_deployed(new_address.clone())
             .execute_on_dest_context::<()>();
 
+        self.platform_contract_proxy()
+            .contract(self.platform().get())
+            .subscribe_franchise(new_address.clone())
+            .execute_on_dest_context::<()>();
+
         self.dex_contract_proxy()
             .contract(self.dex().get())
             .create_pair(self.governance_token().get(), &launchpad.token, 18)
@@ -287,4 +295,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
     #[proxy]
     fn franchise_dao_contract_proxy(&self) -> tfn_franchise_dao::Proxy<Self::Api>;
+
+    #[proxy]
+    fn platform_contract_proxy(&self) -> tfn_platform::Proxy<Self::Api>;
 }

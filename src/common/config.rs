@@ -102,6 +102,11 @@ pub trait ConfigModule {
     #[storage_mapper("dex")]
     fn dex(&self) -> SingleValueMapper<ManagedAddress>;
 
+    // platform address
+    #[view(getPlatform)]
+    #[storage_mapper("platform")]
+    fn platform(&self) -> SingleValueMapper<ManagedAddress>;
+
     // template dao sc address
     #[view(getTemplateDAO)]
     #[storage_mapper("template_dao")]

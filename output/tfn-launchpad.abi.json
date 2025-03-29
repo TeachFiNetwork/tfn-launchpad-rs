@@ -28,6 +28,10 @@
                 "type": "Address"
             },
             {
+                "name": "platform",
+                "type": "Address"
+            },
+            {
                 "name": "template_dao_address",
                 "type": "Address"
             },
@@ -247,6 +251,16 @@
         },
         {
             "name": "getDEX",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getPlatform",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [

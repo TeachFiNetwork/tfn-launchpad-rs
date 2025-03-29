@@ -23,5 +23,8 @@ path = "../tfn-dex-rs"
 [dependencies.tfn-franchise-dao]
 path = "../tfn-franchise-dao-rs"
 
+[dependencies.tfn-platform]
+path = "../tfn-platform-rs"
+
 [dev-dependencies.multiversx-sc-scenario]
 version = "0.54.4"
