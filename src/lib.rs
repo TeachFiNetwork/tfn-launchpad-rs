@@ -152,13 +152,14 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
     #[endpoint(whitelistUser)]
     fn whitelist_user(&self, id: u64, user: ManagedAddress) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         self.only_launchpad_owner(id);
 
         self.whitelisted_users(id).insert(user);
     }
 
     #[payable("*")]
-    #[endpoint]
+    #[endpoint(buy)]
     fn buy(&self, id: u64) {
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(!self.launchpads(id).is_empty(), ERROR_LAUNCHPAD_NOT_FOUND);
