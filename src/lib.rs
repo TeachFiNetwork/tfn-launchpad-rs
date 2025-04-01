@@ -24,16 +24,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
         template_employee_address: ManagedAddress,
         template_student_address: ManagedAddress,
     ) {
-        let shard = self.blockchain().get_shard_of_address(&self.blockchain().get_sc_address());
-        require!(
-            self.blockchain().get_shard_of_address(&main_dao_address) == shard,
-            ERROR_WRONG_MAIN_DAO_SHARD
-        );
-        require!(
-            self.blockchain().get_shard_of_address(&template_dao_address) == shard,
-            ERROR_WRONG_TEMPLATE_DAO_SHARD
-        );
-
         self.main_dao().set(main_dao_address);
         let governance_token: TokenIdentifier = self.main_dao_contract_proxy()
             .contract(self.main_dao().get())
@@ -45,6 +35,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         self.template_dao().set(template_dao_address);
         self.template_employee().set(template_employee_address);
         self.template_student().set(template_student_address);
+        self.set_state_active();
     }
 
     #[upgrade]
