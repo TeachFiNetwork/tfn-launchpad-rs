@@ -51,17 +51,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
     fn upgrade(&self) {
     }
 
-    #[endpoint(changeFranchiseOwner)]
-    fn change_franchise_owner(&self, franchise: ManagedAddress, new_owner: ManagedAddress) {
-        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
-        self.only_dao();
-
-        self.franchise_dao_contract_proxy()
-            .contract(franchise)
-            .change_owner(new_owner)
-            .execute_on_dest_context::<()>();
-    }
-
     #[endpoint(newLaunchpad)]
     fn new_launchpad(
         &self,

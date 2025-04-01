@@ -52,21 +52,6 @@
     },
     "endpoints": [
         {
-            "name": "changeFranchiseOwner",
-            "mutability": "mutable",
-            "inputs": [
-                {
-                    "name": "franchise",
-                    "type": "Address"
-                },
-                {
-                    "name": "new_owner",
-                    "type": "Address"
-                }
-            ],
-            "outputs": []
-        },
-        {
             "name": "newLaunchpad",
             "mutability": "mutable",
             "inputs": [
