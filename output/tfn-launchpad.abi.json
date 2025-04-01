@@ -386,6 +386,21 @@
             ]
         },
         {
+            "name": "isTokenLaunched",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "token",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        },
+        {
             "name": "getLaunchpadUsers",
             "mutability": "readonly",
             "inputs": [

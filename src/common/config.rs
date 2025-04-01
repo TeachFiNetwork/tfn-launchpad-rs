@@ -243,6 +243,22 @@ pub trait ConfigModule {
     #[storage_mapper("token_launchpad_id")]
     fn token_launchpad_id(&self, token: &TokenIdentifier) -> SingleValueMapper<u64>;
 
+    #[view(isTokenLaunched)]
+    fn is_token_launched(&self, token: TokenIdentifier) -> bool {
+        for launchpad_id in 0..self.last_launchpad_id().get() {
+            if self.launchpads(launchpad_id).is_empty() {
+                continue
+            }
+
+            let launchpad = self.launchpads(launchpad_id).get();
+            if launchpad.token == token {
+                return true
+            }
+        }
+
+        false
+    }
+
     #[view(getLaunchpadUsers)]
     #[storage_mapper("launchpad_users")]
     fn launchpad_users(&self, id: u64) -> UnorderedSetMapper<ManagedAddress>;
