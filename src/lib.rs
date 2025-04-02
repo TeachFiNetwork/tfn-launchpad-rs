@@ -128,6 +128,9 @@ pub trait TFNLaunchpadContract<ContractReader>:
                 &launchpad.amount
             );
         }
+        if self.last_launchpad_id().get() ==  id + 1 {
+            self.last_launchpad_id().set(id);
+        }
     }
 
     #[endpoint(whitelistUser)]
