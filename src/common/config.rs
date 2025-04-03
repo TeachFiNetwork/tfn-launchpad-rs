@@ -2,6 +2,7 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
+use tfn_platform::common::config::SubscriberDetails;
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -24,8 +25,8 @@ pub enum Status {
 pub struct Launchpad<M: ManagedTypeApi> {
     pub id: u64,
     pub owner: ManagedAddress<M>,
+    pub details: SubscriberDetails<M>,
     pub kyc_enforced: bool,
-    pub description: ManagedBuffer<M>,
     pub token: TokenIdentifier<M>, // should have 18 decimals. please check in front end
     pub amount: BigUint<M>,
     pub payment_token: TokenIdentifier<M>,
@@ -101,26 +102,6 @@ pub trait ConfigModule {
     #[view(getDEX)]
     #[storage_mapper("dex")]
     fn dex(&self) -> SingleValueMapper<ManagedAddress>;
-
-    // platform address
-    #[view(getPlatform)]
-    #[storage_mapper("platform")]
-    fn platform(&self) -> SingleValueMapper<ManagedAddress>;
-
-    // template dao sc address
-    #[view(getTemplateDAO)]
-    #[storage_mapper("template_dao")]
-    fn template_dao(&self) -> SingleValueMapper<ManagedAddress>;
-
-    // template employee sc address
-    #[view(getTemplateEmployee)]
-    #[storage_mapper("template_employee")]
-    fn template_employee(&self) -> SingleValueMapper<ManagedAddress>;
-
-    // template student sc address
-    #[view(getTemplateStudent)]
-    #[storage_mapper("template_student")]
-    fn template_student(&self) -> SingleValueMapper<ManagedAddress>;
 
     // launchpads
     #[view(getLaunchpad)]

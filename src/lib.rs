@@ -8,7 +8,7 @@ use common::{config::*, consts::*, errors::*};
 use tfn_franchise_dao::ProxyTrait as franchise_dao_proxy;
 use tfn_dao::common::config::ProxyTrait as dao_proxy;
 use tfn_dex::ProxyTrait as dex_proxy;
-use tfn_platform::ProxyTrait as platform_proxy;
+use tfn_platform::{common::config::SubscriberDetails, ProxyTrait as platform_proxy};
 
 #[multiversx_sc::contract]
 pub trait TFNLaunchpadContract<ContractReader>:
@@ -19,10 +19,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
         &self,
         main_dao_address: ManagedAddress,
         dex_address: ManagedAddress,
-        platform: ManagedAddress,
-        template_dao_address: ManagedAddress,
-        template_employee_address: ManagedAddress,
-        template_student_address: ManagedAddress,
     ) {
         self.main_dao().set(main_dao_address);
         let governance_token: TokenIdentifier = self.main_dao_contract_proxy()
@@ -31,23 +27,41 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .execute_on_dest_context();
         self.governance_token().set(governance_token);
         self.dex().set(dex_address);
-        self.platform().set(platform);
-        self.template_dao().set(template_dao_address);
-        self.template_employee().set(template_employee_address);
-        self.template_student().set(template_student_address);
         self.set_state_active();
     }
 
     #[upgrade]
     fn upgrade(&self) {
+        // self.clear_storage();
+    }
+
+    // DEBUG ENDPOINT
+    #[only_owner]
+    #[endpoint(clearStorage)]
+    fn clear_storage(&self) {
+        for launchpad_id in 0..self.last_launchpad_id().take() {
+            if !self.launchpads(launchpad_id).is_empty() {
+                let launchpad = self.launchpads(launchpad_id).get();
+                self.token_launchpad_id(&launchpad.token).clear();
+                self.whitelisted_users(launchpad_id).clear();
+                for user in self.launchpad_users(launchpad_id).iter() {
+                    self.user_participation(&user, launchpad_id).clear();
+                    self.user_launchpads(&user).clear();
+                }
+                self.launchpad_users(launchpad_id).clear();
+                self.launchpads(launchpad_id).clear();
+            }
+        }
+        // clear deployed_launchpads ?
+        self.set_state_inactive();
     }
 
     #[endpoint(newLaunchpad)]
     fn new_launchpad(
         &self,
         owner: ManagedAddress,
+        details: SubscriberDetails<Self::Api>,
         kyc_enforced: bool,
-        description: ManagedBuffer,
         token: TokenIdentifier,
         payment_token: TokenIdentifier,
         price: BigUint, // if payment token is USDC (6 decimals), price should be x_000_000
@@ -71,8 +85,8 @@ pub trait TFNLaunchpadContract<ContractReader>:
         let launchpad = Launchpad{
             id: self.last_launchpad_id().get(),
             owner,
+            details,
             kyc_enforced,
-            description,
             token: token.clone(),
             amount: BigUint::zero(),
             payment_token,
@@ -119,6 +133,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         self.launchpads(id).clear();
         self.token_launchpad_id(&launchpad.token).clear();
+        self.whitelisted_users(id).clear();
 
         if launchpad.amount > 0 {
             self.send().direct_esdt(
@@ -197,6 +212,11 @@ pub trait TFNLaunchpadContract<ContractReader>:
         require!(launchpad.end_time < self.blockchain().get_block_timestamp(), ERROR_LAUNCHPAD_NOT_ENDED);
         require!(!launchpad.deployed, ERROR_ALREADY_DEPLOYED);
 
+        let main_dao_address = self.main_dao().get();
+        let template_dao = self.main_dao_contract_proxy()
+            .contract(main_dao_address.clone())
+            .template_franchise_dao()
+            .execute_on_dest_context();
         let (new_address, ()) = self
             .franchise_dao_contract_proxy()
             .init(
@@ -204,7 +224,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
                 &launchpad.token,
             )
             .deploy_from_source(
-                &self.template_dao().get(),
+                &template_dao,
                 CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC,
             );
 
@@ -227,13 +247,18 @@ pub trait TFNLaunchpadContract<ContractReader>:
         }
 
         self.main_dao_contract_proxy()
-            .contract(self.main_dao().get())
+            .contract(main_dao_address.clone())
             .franchise_deployed(new_address.clone())
             .execute_on_dest_context::<()>();
 
+        let platform_address: ManagedAddress = self.main_dao_contract_proxy()
+            .contract(main_dao_address)
+            .platform_sc()
+            .execute_on_dest_context();
+
         self.platform_contract_proxy()
-            .contract(self.platform().get())
-            .subscribe_franchise(new_address.clone())
+            .contract(platform_address)
+            .subscribe_franchise(new_address.clone(), &launchpad.details)
             .execute_on_dest_context::<()>();
 
         self.dex_contract_proxy()
@@ -259,13 +284,17 @@ pub trait TFNLaunchpadContract<ContractReader>:
             OptionalValue::Some(args) => args,
             OptionalValue::None => ManagedArgBuffer::new(),            
         };
+        let template_dao: ManagedAddress = self.main_dao_contract_proxy()
+            .contract(self.main_dao().get())
+            .template_franchise_dao()
+            .execute_on_dest_context();
         let gas_left = self.blockchain().get_gas_left();
         self.tx()
             .to(franchise_address)
             .gas(gas_left)
             .raw_upgrade()
             .arguments_raw(upgrade_args)
-            .from_source(self.template_dao().get())
+            .from_source(template_dao)
             .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
             .upgrade_async_call_and_exit();
     }

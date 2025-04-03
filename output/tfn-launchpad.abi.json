@@ -26,22 +26,6 @@
             {
                 "name": "dex_address",
                 "type": "Address"
-            },
-            {
-                "name": "platform",
-                "type": "Address"
-            },
-            {
-                "name": "template_dao_address",
-                "type": "Address"
-            },
-            {
-                "name": "template_employee_address",
-                "type": "Address"
-            },
-            {
-                "name": "template_student_address",
-                "type": "Address"
             }
         ],
         "outputs": []
@@ -52,6 +36,13 @@
     },
     "endpoints": [
         {
+            "name": "clearStorage",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
             "name": "newLaunchpad",
             "mutability": "mutable",
             "inputs": [
@@ -60,12 +51,12 @@
                     "type": "Address"
                 },
                 {
-                    "name": "kyc_enforced",
-                    "type": "bool"
+                    "name": "details",
+                    "type": "SubscriberDetails"
                 },
                 {
-                    "name": "description",
-                    "type": "bytes"
+                    "name": "kyc_enforced",
+                    "type": "bool"
                 },
                 {
                     "name": "token",
@@ -236,46 +227,6 @@
         },
         {
             "name": "getDEX",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "Address"
-                }
-            ]
-        },
-        {
-            "name": "getPlatform",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "Address"
-                }
-            ]
-        },
-        {
-            "name": "getTemplateDAO",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "Address"
-                }
-            ]
-        },
-        {
-            "name": "getTemplateEmployee",
-            "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
-                {
-                    "type": "Address"
-                }
-            ]
-        },
-        {
-            "name": "getTemplateStudent",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
@@ -530,12 +481,12 @@
                     "type": "Address"
                 },
                 {
-                    "name": "kyc_enforced",
-                    "type": "bool"
+                    "name": "details",
+                    "type": "SubscriberDetails"
                 },
                 {
-                    "name": "description",
-                    "type": "bytes"
+                    "name": "kyc_enforced",
+                    "type": "bool"
                 },
                 {
                     "name": "token",
@@ -635,6 +586,43 @@
                 {
                     "name": "Deployed",
                     "discriminant": 3
+                }
+            ]
+        },
+        "SubscriberDetails": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "description",
+                    "type": "bytes"
+                },
+                {
+                    "name": "logo",
+                    "type": "bytes"
+                },
+                {
+                    "name": "card",
+                    "type": "bytes"
+                },
+                {
+                    "name": "website",
+                    "type": "bytes"
+                },
+                {
+                    "name": "email",
+                    "type": "bytes"
+                },
+                {
+                    "name": "twitter",
+                    "type": "bytes"
+                },
+                {
+                    "name": "telegram",
+                    "type": "bytes"
                 }
             ]
         }
