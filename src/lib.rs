@@ -15,19 +15,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
     common::config::ConfigModule
 {
     #[init]
-    fn init(
-        &self,
-        main_dao_address: ManagedAddress,
-        dex_address: ManagedAddress,
-    ) {
-        self.main_dao().set(main_dao_address);
-        let governance_token: TokenIdentifier = self.main_dao_contract_proxy()
-            .contract(self.main_dao().get())
-            .governance_token()
-            .execute_on_dest_context();
-        self.governance_token().set(governance_token);
-        self.dex().set(dex_address);
-        self.set_state_active();
+    fn init(&self) {
     }
 
     #[upgrade]
@@ -213,7 +201,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         require!(!launchpad.deployed, ERROR_ALREADY_DEPLOYED);
 
         let main_dao_address = self.main_dao().get();
-        let template_dao = self.main_dao_contract_proxy()
+        let template_dao = self.dao_contract_proxy()
             .contract(main_dao_address.clone())
             .template_franchise_dao()
             .execute_on_dest_context();
@@ -246,12 +234,12 @@ pub trait TFNLaunchpadContract<ContractReader>:
                 .execute_on_dest_context::<()>();
         }
 
-        self.main_dao_contract_proxy()
+        self.dao_contract_proxy()
             .contract(main_dao_address.clone())
             .franchise_deployed(new_address.clone())
             .execute_on_dest_context::<()>();
 
-        let platform_address: ManagedAddress = self.main_dao_contract_proxy()
+        let platform_address: ManagedAddress = self.dao_contract_proxy()
             .contract(main_dao_address)
             .platform_sc()
             .execute_on_dest_context();
@@ -262,7 +250,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .execute_on_dest_context::<()>();
 
         self.dex_contract_proxy()
-            .contract(self.dex().get())
+            .contract(self.dex_sc().get())
             .create_pair(self.governance_token().get(), &launchpad.token, 18)
             .with_egld_transfer(self.call_value().egld_value().clone_value())
             .gas(GAS_LIMIT_FOR_CREATE_PAIR)
@@ -284,7 +272,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
             OptionalValue::Some(args) => args,
             OptionalValue::None => ManagedArgBuffer::new(),            
         };
-        let template_dao: ManagedAddress = self.main_dao_contract_proxy()
+        let template_dao: ManagedAddress = self.dao_contract_proxy()
             .contract(self.main_dao().get())
             .template_franchise_dao()
             .execute_on_dest_context();
@@ -300,12 +288,6 @@ pub trait TFNLaunchpadContract<ContractReader>:
     }
 
     // proxies
-    #[proxy]
-    fn main_dao_contract_proxy(&self) -> tfn_dao::Proxy<Self::Api>;
-
-    #[proxy]
-    fn dex_contract_proxy(&self) -> tfn_dex::Proxy<Self::Api>;
-
     #[proxy]
     fn franchise_dao_contract_proxy(&self) -> tfn_franchise_dao::Proxy<Self::Api>;
 

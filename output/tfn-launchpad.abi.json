@@ -18,16 +18,7 @@
     },
     "name": "TFNLaunchpadContract",
     "constructor": {
-        "inputs": [
-            {
-                "name": "main_dao_address",
-                "type": "Address"
-            },
-            {
-                "name": "dex_address",
-                "type": "Address"
-            }
-        ],
+        "inputs": [],
         "outputs": []
     },
     "upgradeConstructor": {
@@ -216,6 +207,12 @@
             ]
         },
         {
+            "name": "setMainDAO",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
             "name": "getGovernanceToken",
             "mutability": "readonly",
             "inputs": [],
@@ -234,6 +231,17 @@
                     "type": "Address"
                 }
             ]
+        },
+        {
+            "name": "setDEX",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
         },
         {
             "name": "getLaunchpad",

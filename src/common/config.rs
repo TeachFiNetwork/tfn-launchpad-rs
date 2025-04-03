@@ -3,6 +3,8 @@ multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
 use tfn_platform::common::config::SubscriberDetails;
+use tfn_dao::common::config::ProxyTrait as _;
+use tfn_dex::common::config::ProxyTrait as _;
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -76,6 +78,9 @@ pub trait ConfigModule {
     #[only_owner]
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
+        require!(!self.main_dao().is_empty(), ERROR_DAO_NOT_SET);
+        require!(!self.dex_sc().is_empty(), ERROR_DEX_NOT_SET);
+
         self.state().set(State::Active);
     }
 
@@ -94,14 +99,39 @@ pub trait ConfigModule {
     #[storage_mapper("main_dao")]
     fn main_dao(&self) -> SingleValueMapper<ManagedAddress>;
 
+    // should be called only by the DAO SC at initialization
+    #[endpoint(setMainDAO)]
+    fn set_main_dao(&self) {
+        require!(self.main_dao().is_empty(), ERROR_DAO_ALREADY_SET);
+
+        let caller = self.blockchain().get_caller();
+        self.main_dao().set(&caller);
+        let governance_token: TokenIdentifier = self.dao_contract_proxy()
+            .contract(caller)
+            .governance_token()
+            .execute_on_dest_context();
+        self.governance_token().set(governance_token);
+    }
+
     #[view(getGovernanceToken)]
     #[storage_mapper("governance_token")]
     fn governance_token(&self) -> SingleValueMapper<TokenIdentifier>;
 
     // dex sc address
     #[view(getDEX)]
-    #[storage_mapper("dex")]
-    fn dex(&self) -> SingleValueMapper<ManagedAddress>;
+    #[storage_mapper("dex_sc")]
+    fn dex_sc(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[endpoint(setDEX)]
+    fn set_dex(&self, address: ManagedAddress) {
+        require!(self.dex_sc().is_empty(), ERROR_DEX_ALREADY_SET);
+
+        self.dex_sc().set(&address);
+        self.dex_contract_proxy()
+            .contract(address)
+            .set_launchpad_address()
+            .execute_on_dest_context::<()>();
+    }
 
     // launchpads
     #[view(getLaunchpad)]
@@ -277,4 +307,11 @@ pub trait ConfigModule {
         let launchpad = self.launchpads(id).get();
         require!(self.blockchain().get_caller() == launchpad.owner, ERROR_ONLY_LAUNCHPAD_OWNER);
     }
+
+    // proxies
+    #[proxy]
+    fn dao_contract_proxy(&self) -> tfn_dao::Proxy<Self::Api>;
+
+    #[proxy]
+    fn dex_contract_proxy(&self) -> tfn_dex::Proxy<Self::Api>;
 }

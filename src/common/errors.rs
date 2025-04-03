@@ -17,3 +17,7 @@ pub static ERROR_LAUNCHPAD_NOT_ENDED: &[u8] = b"launchpad end time not reached";
 pub static ERROR_ALREADY_DEPLOYED: &[u8] = b"franchise already deployed";
 pub static ERROR_DELETING_LAUNCHPAD: &[u8] = b"can not delete a launchpad when tokens were sold";
 pub static ERROR_ONLY_OWNER_OR_DAO: &[u8] = b"only the owner or the main DAO can execute this action";
+pub static ERROR_DAO_ALREADY_SET: &[u8] = b"DAO contract address already set";
+pub static ERROR_DAO_NOT_SET: &[u8] = b"DAO contract address not set";
+pub static ERROR_DEX_ALREADY_SET: &[u8] = b"DEX contract address already set";
+pub static ERROR_DEX_NOT_SET: &[u8] = b"DEX contract address not set";
