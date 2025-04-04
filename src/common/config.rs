@@ -4,6 +4,7 @@ multiversx_sc::derive_imports!();
 use crate::common::errors::*;
 use tfn_dao::common::config::ProxyTrait as _;
 use tfn_dex::common::config::ProxyTrait as _;
+use tfn_digital_identity::common::config::Identity;
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -26,7 +27,7 @@ pub enum Status {
 pub struct Launchpad<M: ManagedTypeApi> {
     pub id: u64,
     pub owner: ManagedAddress<M>,
-    pub identity_id: u64,
+    pub details: Identity<M>,
     pub kyc_enforced: bool,
     pub token: TokenIdentifier<M>, // should have 18 decimals. please check in front end
     pub amount: BigUint<M>,
@@ -98,6 +99,11 @@ pub trait ConfigModule {
     #[view(getMainDAO)]
     #[storage_mapper("main_dao")]
     fn main_dao(&self) -> SingleValueMapper<ManagedAddress>;
+
+    // platform sc address
+    #[view(getPlatform)]
+    #[storage_mapper("platform")]
+    fn platform(&self) -> SingleValueMapper<ManagedAddress>;
 
     // should be called only by the DAO SC at initialization
     #[endpoint(setMainDAO)]

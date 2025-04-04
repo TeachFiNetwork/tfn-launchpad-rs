@@ -5,10 +5,11 @@ multiversx_sc::imports!();
 pub mod common;
 
 use common::{config::*, consts::*, errors::*};
-use tfn_franchise_dao::ProxyTrait as franchise_dao_proxy;
+use tfn_franchise_dao::{ProxyTrait as franchise_dao_proxy, common::config::ProxyTrait as _};
 use tfn_dao::common::config::ProxyTrait as dao_proxy;
 use tfn_dex::ProxyTrait as dex_proxy;
 use tfn_platform::ProxyTrait as platform_proxy;
+use tfn_digital_identity::common::config::Identity;
 
 #[multiversx_sc::contract]
 pub trait TFNLaunchpadContract<ContractReader>:
@@ -48,7 +49,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
     fn new_launchpad(
         &self,
         owner: ManagedAddress,
-        identity_id: u64,
+        details: Identity<Self::Api>,
         kyc_enforced: bool,
         token: TokenIdentifier,
         payment_token: TokenIdentifier,
@@ -73,7 +74,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         let launchpad = Launchpad{
             id: self.last_launchpad_id().get(),
             owner,
-            identity_id,
+            details,
             kyc_enforced,
             token: token.clone(),
             amount: BigUint::zero(),
@@ -239,14 +240,40 @@ pub trait TFNLaunchpadContract<ContractReader>:
             .franchise_deployed(new_address.clone())
             .execute_on_dest_context::<()>();
 
-        let platform_address: ManagedAddress = self.dao_contract_proxy()
-            .contract(main_dao_address)
-            .platform_sc()
-            .execute_on_dest_context();
+        let identity_id = self.digital_identity_contract_proxy()
+            .contract(self.digital_identity().get())
+            .new_identity(
+                launchpad.clone().details.is_corporate,
+                launchpad.clone().details.legal_id,
+                launchpad.clone().details.birthdate,
+                new_address.clone(),
+                launchpad.clone().details.name,
+                launchpad.clone().details.description,
+                launchpad.clone().details.image,
+                launchpad.clone().details.contact,
+            )
+            .execute_on_dest_context::<u64>();
+
+        let platform_address: ManagedAddress = if self.platform().is_empty() {
+            let address = self.dao_contract_proxy()
+                .contract(main_dao_address)
+                .platform_sc()
+                .execute_on_dest_context();
+            self.platform().set(&address);
+
+            address
+        } else {
+            self.platform().get()
+        };
+
+        self.franchise_dao_contract_proxy()
+            .contract(new_address.clone())
+            .set_identity_id(identity_id)
+            .execute_on_dest_context::<()>();
 
         self.platform_contract_proxy()
             .contract(platform_address)
-            .subscribe_franchise(new_address.clone(), launchpad.identity_id)
+            .subscribe_franchise(new_address.clone(), identity_id)
             .execute_on_dest_context::<()>();
 
         self.dex_contract_proxy()
@@ -293,4 +320,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
     #[proxy]
     fn platform_contract_proxy(&self) -> tfn_platform::Proxy<Self::Api>;
+
+    #[proxy]
+    fn digital_identity_contract_proxy(&self) -> tfn_digital_identity::Proxy<Self::Api>;
 }

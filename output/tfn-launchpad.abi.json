@@ -42,8 +42,8 @@
                     "type": "Address"
                 },
                 {
-                    "name": "identity_id",
-                    "type": "u64"
+                    "name": "details",
+                    "type": "Identity"
                 },
                 {
                     "name": "kyc_enforced",
@@ -198,6 +198,16 @@
         },
         {
             "name": "getMainDAO",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getPlatform",
             "mutability": "readonly",
             "inputs": [],
             "outputs": [
@@ -498,6 +508,47 @@
                 }
             ]
         },
+        "Identity": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                },
+                {
+                    "name": "is_corporate",
+                    "type": "bool"
+                },
+                {
+                    "name": "legal_id",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "birthdate",
+                    "type": "u64"
+                },
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "description",
+                    "type": "bytes"
+                },
+                {
+                    "name": "image",
+                    "type": "bytes"
+                },
+                {
+                    "name": "contact",
+                    "type": "List<bytes>"
+                }
+            ]
+        },
         "Launchpad": {
             "type": "struct",
             "fields": [
@@ -510,8 +561,8 @@
                     "type": "Address"
                 },
                 {
-                    "name": "identity_id",
-                    "type": "u64"
+                    "name": "details",
+                    "type": "Identity"
                 },
                 {
                     "name": "kyc_enforced",
