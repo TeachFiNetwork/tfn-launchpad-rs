@@ -8,7 +8,7 @@ use common::{config::*, consts::*, errors::*};
 use tfn_franchise_dao::ProxyTrait as franchise_dao_proxy;
 use tfn_dao::common::config::ProxyTrait as dao_proxy;
 use tfn_dex::ProxyTrait as dex_proxy;
-use tfn_platform::{common::config::SubscriberDetails, ProxyTrait as platform_proxy};
+use tfn_platform::ProxyTrait as platform_proxy;
 
 #[multiversx_sc::contract]
 pub trait TFNLaunchpadContract<ContractReader>:
@@ -48,7 +48,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
     fn new_launchpad(
         &self,
         owner: ManagedAddress,
-        details: SubscriberDetails<Self::Api>,
+        identity_id: u64,
         kyc_enforced: bool,
         token: TokenIdentifier,
         payment_token: TokenIdentifier,
@@ -73,7 +73,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
         let launchpad = Launchpad{
             id: self.last_launchpad_id().get(),
             owner,
-            details,
+            identity_id,
             kyc_enforced,
             token: token.clone(),
             amount: BigUint::zero(),
@@ -246,7 +246,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         self.platform_contract_proxy()
             .contract(platform_address)
-            .subscribe_franchise(new_address.clone(), &launchpad.details)
+            .subscribe_franchise(new_address.clone(), launchpad.identity_id)
             .execute_on_dest_context::<()>();
 
         self.dex_contract_proxy()

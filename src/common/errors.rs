@@ -21,3 +21,5 @@ pub static ERROR_DAO_ALREADY_SET: &[u8] = b"DAO contract address already set";
 pub static ERROR_DAO_NOT_SET: &[u8] = b"DAO contract address not set";
 pub static ERROR_DEX_ALREADY_SET: &[u8] = b"DEX contract address already set";
 pub static ERROR_DEX_NOT_SET: &[u8] = b"DEX contract address not set";
+pub static ERROR_DIGITAL_IDENTITY_ALREADY_SET: &[u8] = b"digital identity contract address already set";
+pub static ERROR_DIGITAL_IDENTITY_NOT_SET: &[u8] = b"digital identity contract address not set";

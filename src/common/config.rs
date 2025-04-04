@@ -2,7 +2,6 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
-use tfn_platform::common::config::SubscriberDetails;
 use tfn_dao::common::config::ProxyTrait as _;
 use tfn_dex::common::config::ProxyTrait as _;
 
@@ -27,7 +26,7 @@ pub enum Status {
 pub struct Launchpad<M: ManagedTypeApi> {
     pub id: u64,
     pub owner: ManagedAddress<M>,
-    pub details: SubscriberDetails<M>,
+    pub identity_id: u64,
     pub kyc_enforced: bool,
     pub token: TokenIdentifier<M>, // should have 18 decimals. please check in front end
     pub amount: BigUint<M>,
@@ -80,6 +79,7 @@ pub trait ConfigModule {
     fn set_state_active(&self) {
         require!(!self.main_dao().is_empty(), ERROR_DAO_NOT_SET);
         require!(!self.dex_sc().is_empty(), ERROR_DEX_NOT_SET);
+        require!(!self.digital_identity().is_empty(), ERROR_DIGITAL_IDENTITY_NOT_SET);
 
         self.state().set(State::Active);
     }
@@ -111,6 +111,19 @@ pub trait ConfigModule {
             .governance_token()
             .execute_on_dest_context();
         self.governance_token().set(governance_token);
+    }
+
+    // digital identity sc address
+    #[view(getDigitalIdentityAddress)]
+    #[storage_mapper("digital_identity")]
+    fn digital_identity(&self) -> SingleValueMapper<ManagedAddress>;
+
+    // should be called only by the DAO SC at initialization
+    #[endpoint(setDigitalIdentity)]
+    fn set_digital_identity(&self, address: ManagedAddress) {
+        require!(self.digital_identity().is_empty(), ERROR_DIGITAL_IDENTITY_ALREADY_SET);
+
+        self.digital_identity().set(address);
     }
 
     #[view(getGovernanceToken)]
