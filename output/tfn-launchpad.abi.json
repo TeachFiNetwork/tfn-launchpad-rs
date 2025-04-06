@@ -13,7 +13,7 @@
         },
         "framework": {
             "name": "multiversx-sc",
-            "version": "0.54.5"
+            "version": "0.54.6"
         }
     },
     "name": "TFNLaunchpadContract",
@@ -294,14 +294,42 @@
             "mutability": "readonly",
             "inputs": [
                 {
-                    "name": "user",
-                    "type": "optional<Address>",
+                    "name": "start_idx",
+                    "type": "u64"
+                },
+                {
+                    "name": "end_idx",
+                    "type": "u64"
+                },
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "status",
+                    "type": "optional<Status>",
                     "multi_arg": true
                 }
             ],
             "outputs": [
                 {
                     "type": "List<LaunchpadView>"
+                }
+            ]
+        },
+        {
+            "name": "getLaunchpadsCount",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "status",
+                    "type": "optional<Status>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
                 }
             ]
         },

@@ -158,13 +158,21 @@ pub trait ConfigModule {
     fn launchpads(&self, id: u64) -> SingleValueMapper<Launchpad<Self::Api>>;
 
     #[view(getAllLaunchpads)]
-    fn get_all_launchpads(&self, user: OptionalValue<ManagedAddress>) -> ManagedVec<LaunchpadView<Self::Api>> {
-        let address = match user {
-            OptionalValue::Some(addr) => addr,
-            OptionalValue::None => ManagedAddress::zero(),
+    fn get_all_launchpads(
+        &self,
+        start_idx: u64,
+        end_idx: u64,
+        address: ManagedAddress,
+        status: OptionalValue<Status>,
+    ) -> ManagedVec<LaunchpadView<Self::Api>> {
+        let (all_statuses, filter_status) = match status {
+            OptionalValue::Some(status) => (false, status),
+            OptionalValue::None => (true, Status::Pending),
         };
+        let all_indexes = start_idx == 0 && end_idx == 0;
         let current_time = self.blockchain().get_block_timestamp();
         let mut launchpads: ManagedVec<LaunchpadView<Self::Api>> = ManagedVec::new();
+        let mut real_idx = 0;
         for i in 0..self.last_launchpad_id().get() {
             if self.launchpads(i).is_empty() {
                 continue
@@ -172,14 +180,40 @@ pub trait ConfigModule {
 
             let mut launchpad = self.launchpads(i).get();
             launchpad.status = launchpad.get_status(current_time);
-            launchpads.push(LaunchpadView {
-                bought: self.user_participation(&address, i).get(),
-                whitelisted: self.whitelisted_users(i).contains(&address) || !launchpad.kyc_enforced,
-                launchpad,
-            });
+            let status_ok = all_statuses || launchpad.status == filter_status;
+            let idx_ok = all_indexes || (real_idx >= start_idx && real_idx <= end_idx);
+            if status_ok && idx_ok {
+                launchpads.push(LaunchpadView {
+                    bought: self.user_participation(&address, i).get(),
+                    whitelisted: self.whitelisted_users(i).contains(&address) || !launchpad.kyc_enforced,
+                    launchpad,
+                });
+            }
+            real_idx += 1;
         }
 
         launchpads
+    }
+    
+    #[view(getLaunchpadsCount)]
+    fn get_launchpads_count(&self, status: OptionalValue<Status>) -> u64 {
+        let (all_statuses, filter_status) = match status {
+            OptionalValue::Some(status) => (false, status),
+            OptionalValue::None => (true, Status::Pending),
+        };
+        let current_time = self.blockchain().get_block_timestamp();
+        let mut count = 0;
+        for i in 0..self.last_launchpad_id().get() {
+            if self.launchpads(i).is_empty() {
+                continue
+            }
+
+            if all_statuses || self.launchpads(i).get().get_status(current_time) == filter_status {
+                count += 1;
+            }
+        }
+
+        count
     }
 
     #[view(getAllLaunchpadsSince)]
