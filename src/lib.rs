@@ -278,7 +278,7 @@ pub trait TFNLaunchpadContract<ContractReader>:
 
         self.dex_contract_proxy()
             .contract(self.dex_sc().get())
-            .create_pair(self.governance_token().get(), &launchpad.token, 18)
+            .create_pair(self.governance_token().get(), &launchpad.token)
             .with_egld_transfer(self.call_value().egld_value().clone_value())
             .gas(GAS_LIMIT_FOR_CREATE_PAIR)
             .execute_on_dest_context::<()>();
