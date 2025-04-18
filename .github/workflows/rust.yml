@@ -1,0 +1,93 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Tests
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-tests-rs
+        path: tfn-tests-rs
+
+    - name: Checkout DAO
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-dao-rs
+        path: tfn-dao-rs
+
+    - name: Checkout DEX
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-dex-rs
+        path: tfn-dex-rs
+
+    - name: Checkout Launchpad
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-launchpad-rs
+        path: tfn-launchpad-rs
+
+    - name: Checkout Staking
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-staking-rs
+        path: tfn-staking-rs
+
+    - name: Checkout Franchise DAO
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-franchise-dao-rs
+        path: tfn-franchise-dao-rs
+
+    - name: Checkout Digital Identity
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-digital-identity-rs
+        path: tfn-digital-identity-rs
+
+    - name: Checkout Platform
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-platform-rs
+        path: tfn-platform-rs
+
+    - name: Checkout Test Launchpad
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-test-launchpad-rs
+        path: tfn-test-launchpad-rs
+
+    - name: Checkout Test DEX
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-test-dex-rs
+        path: tfn-test-dex-rs
+
+    - name: Checkout Test Staking
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-test-staking-rs
+        path: tfn-test-staking-rs
+
+    - name: Checkout NFT Marketplace
+      uses: actions/checkout@v4
+      with:
+        repository: TeachFiNetwork/tfn-nft-marketplace-rs
+        path: tfn-nft-marketplace-rs
+
+    - name: Run tests
+      run: |
+        cd tfn-tests-rs
+        cargo test --verbose
