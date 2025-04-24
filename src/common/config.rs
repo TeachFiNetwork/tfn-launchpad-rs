@@ -127,7 +127,9 @@ pub trait ConfigModule {
     // should be called only by the DAO SC at initialization
     #[endpoint(setDigitalIdentity)]
     fn set_digital_identity(&self, address: ManagedAddress) {
-        require!(self.digital_identity().is_empty(), ERROR_DIGITAL_IDENTITY_ALREADY_SET);
+        if !self.digital_identity().is_empty() {
+            return
+        }
 
         self.digital_identity().set(address);
     }
